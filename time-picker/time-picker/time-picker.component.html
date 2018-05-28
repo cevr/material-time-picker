@@ -1,0 +1,21 @@
+<div class="time-picker-container">
+
+  <div>
+    <div></div>
+    <div>
+      <button (mousedown)="increment(hour, context)" [disabled]="time.hour + 10 > config.rangeTime.end">
+        <mat-icon>keyboard_arrow_up</mat-icon>
+      </button>
+    </div>
+  </div>
+
+
+
+  <div class="time-picker-row">
+    <div *ngFor="let value of core.parseStringToTime(time)" class="time-picker-clock" [ngClass]="{value: value !== ':'}">
+      {{value}}
+    </div>
+  </div>
+  <div></div>
+
+</div>
