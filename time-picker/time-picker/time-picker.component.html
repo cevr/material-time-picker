@@ -3,7 +3,7 @@
   <div>
     <div></div>
     <div>
-      <button (mousedown)="increment(hour, context)" [disabled]="time.hour + 10 > config.rangeTime.end">
+      <button (mousedown)="increment(hour, 'HH')" [disabled]="allowedTimes.includes(core.numberToDisplayTime(timeAsNumber + 10))">
         <mat-icon>keyboard_arrow_up</mat-icon>
       </button>
     </div>

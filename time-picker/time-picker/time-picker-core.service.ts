@@ -3,7 +3,7 @@ import { Time } from '../definitions';
 
 @Injectable()
 export class TimePickerCoreService {
-  public getAllowedTimes(min, max) {
+  public getAllowedTimes(min: string, max: string, isTwentyFourHours: boolean = false) {
     const hour = {
       minimum: +min.split(':')[0],
       max: +max.split(':')[0]
@@ -13,23 +13,11 @@ export class TimePickerCoreService {
       max: +max.split(':')[1]
     };
 
-    return this.calculateAllowedTimes(hour, minute, hour.minimum);
+    return this.calculateAllowedTimes(hour, minute, hour.minimum, isTwentyFourHours);
   }
-
-  private calculateAllowedMinutes(minimum, maximum, index, times = []) {
-    if (minimum > maximum) {
-      return times;
-    }
-    const hourTime = index <= 12 ? index : index - 12;
-    const minuteTime = minimum;
-    const ampm = index < 12 ? 'AM' : 'PM';
-    times = times.concat(`${hourTime}:${minuteTime} ${ampm}`);
-    minimum++;
-    return this.calculateAllowedMinutes(minimum, maximum, index, times);
-  }
-
-  private calculateAllowedTimes(hour, minute, hourIndex = hour.minimum, allowedTimes = []) {
+  private calculateAllowedTimes(hour: any, minute: any, hourIndex: number, isTwentyFourHours: boolean, allowedTimes: string[] = []) {
     if (hourIndex > hour.max) {
+      console.log(allowedTimes);
       return allowedTimes;
     }
     let minimumMin = 0;
@@ -39,11 +27,26 @@ export class TimePickerCoreService {
     } else if (hourIndex === hour.max) {
       maximumMin = minute.max;
     }
-    allowedTimes = allowedTimes.concat(
-      this.calculateAllowedMinutes(minimumMin, maximumMin, hourIndex)
-    );
+    allowedTimes = allowedTimes.concat(this.calculateAllowedMinutes(minimumMin, maximumMin, hourIndex, isTwentyFourHours));
     hourIndex++;
-    return this.calculateAllowedTimes(hour, minute, hourIndex, allowedTimes);
+    return this.calculateAllowedTimes(hour, minute, hourIndex, isTwentyFourHours, allowedTimes);
+  }
+
+  private calculateAllowedMinutes(minimum: number, maximum: number, hour: number, isTwentyFourHours: boolean, times: string[] = []) {
+    if (minimum > maximum) {
+      return times;
+    }
+    if (isTwentyFourHours) {
+      times = times.concat(`${this.numberToTime(hour)}:${this.numberToTime(minimum)}`);
+      minimum++;
+      return this.calculateAllowedMinutes(minimum, maximum, hour, isTwentyFourHours, times);
+    } else {
+      const hourTime = hour <= 12 ? hour : hour - 12;
+      const ampm = hour < 12 ? 'AM' : 'PM';
+      times = times.concat(`${this.numberToTime(hourTime)}:${this.numberToTime(minimum)} ${ampm}`);
+      minimum++;
+      return this.calculateAllowedMinutes(minimum, maximum, hour, isTwentyFourHours, times);
+    }
   }
 
   /**
@@ -78,6 +81,16 @@ export class TimePickerCoreService {
     return number < 10 ? `0${number}` : number.toString();
   }
 
+  timeToNumber(time: string): number {
+    return Number(this.parseStringToTime(time).join('.'));
+  }
+
+  numberToDisplayTime(number: number) {
+    return number
+      .toString()
+      .split('.')
+      .join(':');
+  }
   getTime(hour, minute, second?): string {
     return `${hour}:${minute}`;
   }
